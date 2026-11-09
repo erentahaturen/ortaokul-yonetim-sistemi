@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ortaokul Yönetim Sistemi - Öğrenci, Sınıf, Öğretmen & Program</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --border: #e2e8f0;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #d97706;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text-main); padding: 24px; }
+        .header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 24px; font-weight: 700; color: #1e293b; }
+        .header p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+        
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid var(--border); padding-bottom: 2px; }
+        .tab-btn {
+            background: none; border: none; padding: 10px 18px; font-size: 14px; font-weight: 600;
+            color: var(--text-muted); cursor: pointer; border-radius: 8px 8px 0 0; position: relative;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover { color: var(--primary); background: #f1f5f9; }
+        .tab-btn.active { color: var(--primary); background: var(--surface); border: 1px solid var(--border); border-bottom: 2px solid var(--surface); margin-bottom: -2px; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+        .badge-blue { background: #eff6ff; color: #1d4ed8; }
+        .badge-pink { background: #fdf2f8; color: #be185d; }
+        .badge-purple { background: #faf5ff; color: #7e22ce; }
+        .badge-green { background: #f0fdf4; color: #166534; }
+        .badge-yellow { background: #fefce8; color: #854d0e; }
+
+        .btn {
+            padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+            border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-detail { background: #f1f5f9; color: #334155; border: 1px solid var(--border); }
+        .btn-detail:hover { background: #e2e8f0; color: #0f172a; }
+        .btn-danger { background: #fee2e2; color: #dc2626; }
+        .btn-danger:hover { background: #fecaca; }
+
+        .stats-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;
+        }
+        .card {
+            background: var(--surface); padding: 20px; border-radius: 12px; border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .card-label { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-value { font-size: 26px; font-weight: 700; margin-top: 8px; color: var(--text-main); }
+        .card-sub { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+        .form-card {
+            background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px;
+            margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: none;
+        }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 14px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none;
+        }
+
+        .search-bar {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px;
+            margin-bottom: 18px; display: flex; gap: 12px; align-items: center;
+        }
+        .search-bar input, .search-bar select {
+            padding: 9px 13px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; outline: none;
+        }
+        .search-bar input { flex: 1; }
+
+        .table-container {
+            background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th { background: #f8fafc; color: #475569; padding: 13px 16px; font-weight: 600; border-bottom: 1px solid var(--border); }
+        td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: #334155; }
+        tr:hover td { background: #f8fafc; }
+
+        .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+        .chip-green { background: #dcfce7; color: #15803d; }
+        .chip-red { background: #fee2e2; color: #b91c1c; }
+        .chip-orange { background: #fef3c7; color: #b45309; }
+
+        /* Ders Programı Grid Stili */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .schedule-header {
+            background: #1e293b;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .time-slot {
+            background: #e2e8f0;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .lesson-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 12px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .lesson-card b { display: block; font-size: 13px; color: #0f172a; margin-bottom: 2px; }
+        .lesson-card span { color: var(--text-muted); font-size: 11px; }
+
+        /* Modal */
+        .modal {
+            display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.4); backdrop-filter: blur(2px); align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; border-radius: 16px; width: 90%; max-width: 650px; max-height: 85vh;
+            overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 16px; }
+        .modal-header h2 { font-size: 18px; color: #1e293b; }
+        .close-btn { font-size: 22px; cursor: pointer; color: var(--text-muted); border: none; background: transparent; }
+        .days-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-top: 14px; }
+        .day-box { padding: 8px 10px; border-radius: 8px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+        .day-box.Geldi { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+        .day-box.Gelmedi { background: #fef2f2; border-color: #fecaca; color: #991b1b; font-weight: 700; }
+        .day-box.Izinli { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>🏫 Ortaokul Yönetim Sistemi</h1>
+            <p>SQLite (okul.db) - Öğrenciler, Sınıflar, Öğretmenler ve Haftalık Ders Programı</p>
+        </div>
+        <div>
+            <button class="btn btn-primary" id="addBtn" onclick="toggleAddForm()">➕ Yeni Kayıt Ekle</button>
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="stats-grid">
+        <div class="card">
+            <div class="card-label">Toplam Öğrenci</div>
+            <div class="card-value" id="statToplam">0</div>
+            <div class="card-sub" id="statCinsiyet">0 Erkek | 0 Kız</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Haftalık Ders Saati</div>
+            <div class="card-value" style="color: #2563eb;">560 Saat</div>
+            <div class="card-sub">16 Şube x 35 Ders / Hafta</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Öğretmen Kadrosu</div>
+            <div class="card-value" id="statOgretmen">16 Öğretmen</div>
+            <div class="card-sub">Tüm branşlar ve rehberlik</div>
+        </div>
+        <div class="card">
+            <div class="card-label">Ortalama Boy / Kilo</div>
+            <div class="card-value" id="statOrtalama">0 cm / 0 kg</div>
+            <div class="card-sub">Okul geneli ortalama</div>
+        </div>
+    </div>
+
+    <!-- Sekmeler -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('program')">📅 Haftalık Ders Programı</button>
+        <button class="tab-btn" onclick="switchTab('ogrenciler')">👨‍🎓 Öğrenciler & Yoklama</button>
+        <button class="tab-btn" onclick="switchTab('siniflar')">🏫 Sınıflar & Şubeler</button>
+        <button class="tab-btn" onclick="switchTab('ogretmenler')">👩‍🏫 Öğretmen Kadrosu</button>
+    </div>
+
+    <!-- 0. SEKME: HAFTALIK DERS PROGRAMI -->
+    <div id="tab-program" class="tab-content active">
+        <div class="search-bar">
+            <label style="font-size: 13px; font-weight: 600; color: #475569;">Görüntülenecek Sınıfı Seçin:</label>
+            <select id="scheduleClassSelect" onchange="renderSchedule()" style="min-width: 150px; font-weight: 600;">
+                <!-- Dinamik doldurulacak -->
+            </select>
+            <span id="classDetailBadge" style="margin-left: 10px; font-size: 13px; color: var(--text-muted);"></span>
+        </div>
+
+        <div class="schedule-grid" id="scheduleGrid">
+            <!-- Program Grid'i JS ile oluşturulacak -->
+        </div>
+    </div>
+
+    <!-- 1. SEKME: ÖĞRENCİLER -->
+    <div id="tab-ogrenciler" class="tab-content">
+        <div class="form-card" id="studentForm">
+            <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 12px;">➕ Yeni Öğrenci Ekle</h3>
+            <form onsubmit="saveStudent(event)">
+                <div class="form-grid">
+                    <div class="form-group"><label>Okul No</label><input type="number" id="formNo" required placeholder="301"></div>
+                    <div class="form-group"><label>Ad</label><input type="text" id="formAd" required placeholder="Ahmet"></div>
+                    <div class="form-group"><label>Soyad</label><input type="text" id="formSoyad" required placeholder="Yılmaz"></div>
+                    <div class="form-group"><label>Cinsiyet</label>
+                        <select id="formCinsiyet" required>
+                            <option value="Erkek">Erkek</option>
+                            <option value="Kız">Kız</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Sınıf</label>
+                        <select id="formSinif" required>
+                            <option value="5">5. Sınıf</option>
+                            <option value="6">6. Sınıf</option>
+                            <option value="7">7. Sınıf</option>
+                            <option value="8">8. Sınıf</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Şube</label>
+                        <select id="formSube" required>
+                            <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Boy (cm)</label><input type="number" step="0.1" id="formBoy" required placeholder="155.0"></div>
+                    <div class="form-group"><label>Kilo (kg)</label><input type="number" step="0.1" id="formKilo" required placeholder="46.0"></div>
+                </div>
+                <div style="margin-top: 14px; display: flex; justify-content: flex-end; gap: 8px;">
+                    <button type="button" class="btn" style="background:#e2e8f0;" onclick="toggleAddForm()">İptal</button>
+                    <button type="submit" class="btn btn-primary">Kaydet</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Öğrenci Adı, Soyadı veya Okul No ile ara..." onkeyup="renderStudents()">
+            <select id="genderFilter" onchange="renderStudents()">
+                <option value="">Tüm Cinsiyetler</option>
+                <option value="Erkek">Erkek</option>
+                <option value="Kız">Kız</option>
+            </select>
+            <select id="classFilter" onchange="renderStudents()">
+                <option value="">Tüm Sınıflar</option>
+                <option value="5">5. Sınıflar</option>
+                <option value="6">6. Sınıflar</option>
+                <option value="7">7. Sınıflar</option>
+                <option value="8">8. Sınıflar</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Okul No</th>
+                        <th>Adı Soyadı</th>
+                        <th>Cinsiyet</th>
+                        <th>Sınıf / Şube</th>
+                        <th>Boy / Kilo</th>
+                        <th>90 Günlük Özet</th>
+                        <th>Devamsızlık Durumu</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody id="studentsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2. SEKME: SINIFLAR -->
+    <div id="tab-siniflar" class="tab-content">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sınıf / Şube</th>
+                        <th>Derslik Konumu</th>
+                        <th>Sınıf Rehber Öğretmeni</th>
+                        <th>Rehber Öğretmen Branşı</th>
+                        <th>Kayıtlı Öğrenci Sayısı</th>
+                        <th>Cinsiyet Dağılımı</th>
+                    </tr>
+                </thead>
+                <tbody id="classesBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 3. SEKME: ÖĞRETMENLER -->
+    <div id="tab-ogretmenler" class="tab-content">
+        <div class="form-card" id="teacherForm">
+            <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 12px;">➕ Yeni Öğretmen Ekle</h3>
+            <form onsubmit="saveTeacher(event)">
+                <div class="form-grid">
+                    <div class="form-group"><label>Ad</label><input type="text" id="tAd" required placeholder="Kemal"></div>
+                    <div class="form-group"><label>Soyad</label><input type="text" id="tSoyad" required placeholder="Yılmaz"></div>
+                    <div class="form-group"><label>Branş</label><input type="text" id="tBrans" required placeholder="Matematik"></div>
+                    <div class="form-group"><label>Cinsiyet</label>
+                        <select id="tCinsiyet" required>
+                            <option value="Erkek">Erkek</option>
+                            <option value="Kız">Kız</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Telefon</label><input type="text" id="tTel" placeholder="0532 ..."></div>
+                    <div class="form-group"><label>E-posta</label><input type="email" id="tMail" placeholder="ad@okul.meb.k12.tr"></div>
+                </div>
+                <div style="margin-top: 14px; display: flex; justify-content: flex-end; gap: 8px;">
+                    <button type="button" class="btn" style="background:#e2e8f0;" onclick="toggleAddForm()">İptal</button>
+                    <button type="submit" class="btn btn-primary">Öğretmeni Kaydet</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Adı Soyadı</th>
+                        <th>Branş</th>
+                        <th>Cinsiyet</th>
+                        <th>Rehberlik Yaptığı Sınıf</th>
+                        <th>Telefon</th>
+                        <th>E-posta</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="teachersBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 90 Günlük Detay Modalı -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modalStudentName">Öğrenci Yoklama Detayı</h2>
+                    <span id="modalStudentInfo" style="font-size: 13px; color: var(--text-muted);">Son 90 İş Günü</span>
+                </div>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalSummary" style="display: flex; gap: 10px; margin-bottom: 14px;"></div>
+            <h4 style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">GÜN GÜN YOKLAMA ÇİZELGESİ:</h4>
+            <div class="days-grid" id="modalDaysGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'program';
+        let allStudents = [];
+        let allClasses = [];
+        let allTeachers = [];
+        let scheduleData = [];
+
+        const DAYS = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma"];
+        const HOURS = [
+            "1. Ders (08:30 - 09:10)",
+            "2. Ders (09:25 - 10:05)",
+            "3. Ders (10:20 - 11:00)",
+            "4. Ders (11:15 - 11:55)",
+            "5. Ders (12:45 - 13:25)",
+            "6. Ders (13:40 - 14:20)",
+            "7. Ders (14:35 - 15:15)"
+        ];
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+
+            document.getElementById('studentForm').style.display = 'none';
+            document.getElementById('teacherForm').style.display = 'none';
+
+            const addBtn = document.getElementById('addBtn');
+            if (tab === 'ogretmenler') {
+                addBtn.innerText = '➕ Yeni Öğretmen Ekle';
+                addBtn.style.display = 'inline-flex';
+            } else if (tab === 'ogrenciler') {
+                addBtn.innerText = '➕ Yeni Öğrenci Ekle';
+                addBtn.style.display = 'inline-flex';
+            } else {
+                addBtn.style.display = 'none';
+            }
+
+            if (tab === 'program') loadSchedule();
+            if (tab === 'siniflar') loadClasses();
+            if (tab === 'ogretmenler') loadTeachers();
+        }
+
+        async function loadSchedule() {
+            // Sınıfları doldur
+            if (allClasses.length === 0) {
+                const resC = await fetch('/api/siniflar');
+                allClasses = await resC.json();
+                const sel = document.getElementById('scheduleClassSelect');
+                sel.innerHTML = '';
+                allClasses.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.innerText = `${c.sinif_adi} Sınıfı`;
+                    sel.appendChild(opt);
+                });
+            }
+
+            const sinifId = document.getElementById('scheduleClassSelect').value || allClasses[0]?.id;
+            const res = await fetch(`/api/ders-programi?sinif_id=${sinifId}`);
+            scheduleData = await res.json();
+            renderScheduleGrid();
+        }
+
+        function renderSchedule() {
+            loadSchedule();
+        }
+
+        function renderScheduleGrid() {
+            const grid = document.getElementById('scheduleGrid');
+            grid.innerHTML = '';
+
+            // Seçili sınıf bilgisi
+            const sinifId = document.getElementById('scheduleClassSelect').value;
+            const curClass = allClasses.find(c => c.id == sinifId);
+            if (curClass) {
+                document.getElementById('classDetailBadge').innerText = 
+                    `📍 Derslik: ${curClass.derslik} | 👨‍🏫 Rehber Öğretmen: ${curClass.rehber_ogretmen} (${curClass.rehber_brans}) | 👥 Mevcut: ${curClass.ogrenci_sayisi} Öğrenci`;
+            }
+
+            // Başlık satırı (Saat + Günler)
+            const emptyCorner = document.createElement('div');
+            emptyCorner.className = 'schedule-header';
+            emptyCorner.innerText = 'Saat / Gün';
+            grid.appendChild(emptyCorner);
+
+            DAYS.forEach(day => {
+                const dHeader = document.createElement('div');
+                dHeader.className = 'schedule-header';
+                dHeader.innerText = day;
+                grid.appendChild(dHeader);
+            });
+
+            // 7 ders saati için satırlar
+            for (let h = 1; h <= 7; h++) {
+                // Saat kolonu
+                const tBox = document.createElement('div');
+                tBox.className = 'time-slot';
+                tBox.innerHTML = `<strong>${h}. Ders</strong>`;
+                grid.appendChild(tBox);
+
+                // Gün kolonları
+                DAYS.forEach(day => {
+                    const lesson = scheduleData.find(l => l.gun === day && l.ders_saati === h);
+                    const cell = document.createElement('div');
+                    cell.className = 'lesson-card';
+
+                    if (lesson) {
+                        const borderColors = {
+                            "Sayısal": "#2563eb",
+                            "Sözel": "#d97706",
+                            "Yabancı Dil": "#7e22ce",
+                            "Yetenek": "#16a34a",
+                            "Rehberlik": "#dc2626"
+                        };
+                        cell.style.borderLeftColor = borderColors[lesson.kategori] || '#2563eb';
+
+                        cell.innerHTML = `
+                            <b>${lesson.ders_adi}</b>
+                            <span>👨‍🏫 ${lesson.ogretmen_adi}</span><br>
+                            <span style="font-size: 10px; color: #94a3b8;">${lesson.kategori}</span>
+                        `;
+                    } else {
+                        cell.style.background = '#f8fafc';
+                        cell.style.borderStyle = 'dashed';
+                        cell.innerHTML = '<span style="color:#cbd5e1;">Boş</span>';
+                    }
+                    grid.appendChild(cell);
+                });
+            }
+        }
+
+        function toggleAddForm() {
+            if (currentTab === 'ogrenciler') {
+                const f = document.getElementById('studentForm');
+                f.style.display = f.style.display === 'block' ? 'none' : 'block';
+            } else if (currentTab === 'ogretmenler') {
+                const f = document.getElementById('teacherForm');
+                f.style.display = f.style.display === 'block' ? 'none' : 'block';
+            }
+        }
+
+        async function loadStudents() {
+            try {
+                const res = await fetch('/api/ogrenciler');
+                const data = await res.json();
+                allStudents = data.ogrenciler;
+
+                document.getElementById('statToplam').innerText = data.stats.toplam;
+                document.getElementById('statCinsiyet').innerText = `${data.stats.erkek} Erkek | ${data.stats.kiz} Kız`;
+                document.getElementById('statOrtalama').innerText = `${data.stats.avg_boy} cm / ${data.stats.avg_kilo} kg`;
+                document.getElementById('statOgretmen').innerText = `${data.stats.toplam_ogretmen} Öğretmen`;
+
+                renderStudents();
+            } catch (err) {
+                console.error("Öğrenci yükleme hatası:", err);
+            }
+        }
+
+        function renderStudents() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const gender = document.getElementById('genderFilter').value;
+            const classVal = document.getElementById('classFilter').value;
+            const tbody = document.getElementById('studentsBody');
+            tbody.innerHTML = '';
+
+            const filtered = allStudents.filter(o => {
+                const matchesSearch = `${o.okul_no} ${o.ad} ${o.soyad}`.toLowerCase().includes(search);
+                const matchesGender = !gender || o.cinsiyet === gender;
+                const matchesClass = !classVal || o.sinif.toString() === classVal;
+                return matchesSearch && matchesGender && matchesClass;
+            });
+
+            filtered.forEach(o => {
+                const tr = document.createElement('tr');
+                const badgeClass = o.cinsiyet === 'Erkek' ? 'badge-blue' : 'badge-pink';
+                const devamsizStyle = o.gelmedi > 7 ? 'chip-red' : (o.gelmedi > 4 ? 'chip-orange' : 'chip-green');
+
+                tr.innerHTML = `
+                    <td><strong>#${o.okul_no}</strong></td>
+                    <td><strong>${o.ad} ${o.soyad}</strong></td>
+                    <td><span class="badge ${badgeClass}">${o.cinsiyet}</span></td>
+                    <td><span class="badge badge-purple">${o.sinif}/${o.sube}</span></td>
+                    <td>${o.boy_cm} cm / ${o.kilo_kg} kg</td>
+                    <td>
+                        <span class="chip chip-green">✔ ${o.geldi} Gün Geldi</span>
+                        <span class="chip chip-orange">📋 ${o.izinli} Gün İzinli</span>
+                    </td>
+                    <td>
+                        <span class="chip ${devamsizStyle}" style="font-size: 13px;">
+                            ✖ <strong>${o.gelmedi} Gün</strong> Gelmedi
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 6px;">
+                            <button class="btn btn-detail" onclick="showAttendanceDetail(${o.id}, '${o.ad} ${o.soyad}', '${o.okul_no}', ${o.geldi}, ${o.gelmedi}, ${o.izinli})">
+                                📅 90 Günü İncele
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteStudent(${o.id}, '${o.ad} ${o.soyad}')">
+                                🗑 Sil
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function loadClasses() {
+            const res = await fetch('/api/siniflar');
+            allClasses = await res.json();
+            const tbody = document.getElementById('classesBody');
+            tbody.innerHTML = '';
+
+            allClasses.forEach(c => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="badge badge-purple" style="font-size: 14px;">${c.sinif_adi}</span></td>
+                    <td>${c.derslik}</td>
+                    <td><strong>${c.rehber_ogretmen || 'Atanmadı'}</strong></td>
+                    <td><span class="badge badge-blue">${c.rehber_brans || '-'}</span></td>
+                    <td><strong>${c.ogrenci_sayisi} Öğrenci</strong></td>
+                    <td>${c.erkek_sayisi} Erkek / ${c.kiz_sayisi} Kız</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function loadTeachers() {
+            const res = await fetch('/api/ogretmenler');
+            allTeachers = await res.json();
+            const tbody = document.getElementById('teachersBody');
+            tbody.innerHTML = '';
+
+            allTeachers.forEach(t => {
+                const tr = document.createElement('tr');
+                const badgeClass = t.cinsiyet === 'Erkek' ? 'badge-blue' : 'badge-pink';
+                tr.innerHTML = `
+                    <td><strong>${t.ad} ${t.soyad}</strong></td>
+                    <td><span class="badge badge-blue" style="font-size: 13px;">${t.brans}</span></td>
+                    <td><span class="badge ${badgeClass}">${t.cinsiyet}</span></td>
+                    <td>${t.rehberlik_sinifi ? `<span class="badge badge-purple">${t.rehberlik_sinifi} Sınıfı</span>` : '<span style="color:var(--text-muted);">-</span>'}</td>
+                    <td>${t.telefon || '-'}</td>
+                    <td>${t.eposta || '-'}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteTeacher(${t.id}, '${t.ad} ${t.soyad}')">🗑 Sil</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        async function saveStudent(e) {
+            e.preventDefault();
+            const payload = {
+                okul_no: document.getElementById('formNo').value,
+                ad: document.getElementById('formAd').value,
+                soyad: document.getElementById('formSoyad').value,
+                cinsiyet: document.getElementById('formCinsiyet').value,
+                sinif: document.getElementById('formSinif').value,
+                sube: document.getElementById('formSube').value,
+                boy_cm: document.getElementById('formBoy').value,
+                kilo_kg: document.getElementById('formKilo').value
+            };
+
+            const res = await fetch('/api/ogrenci-ekle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+
+            if (result.status === 'success') {
+                alert('Öğrenci başarıyla eklendi!');
+                toggleAddForm();
+                e.target.reset();
+                loadStudents();
+            } else {
+                alert('Hata: ' + result.message);
+            }
+        }
+
+        async function saveTeacher(e) {
+            e.preventDefault();
+            const payload = {
+                ad: document.getElementById('tAd').value,
+                soyad: document.getElementById('tSoyad').value,
+                brans: document.getElementById('tBrans').value,
+                cinsiyet: document.getElementById('tCinsiyet').value,
+                telefon: document.getElementById('tTel').value,
+                eposta: document.getElementById('tMail').value
+            };
+
+            const res = await fetch('/api/ogretmen-ekle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.status === 'success') {
+                alert('Öğretmen başarıyla eklendi!');
+                toggleAddForm();
+                e.target.reset();
+                loadTeachers();
+                loadStudents();
+            }
+        }
+
+        async function deleteStudent(id, name) {
+            if (confirm(`${name} isimli öğrenciyi silmek istediğinize emin misiniz?`)) {
+                await fetch(`/api/ogrenci-sil/${id}`, { method: 'DELETE' });
+                loadStudents();
+            }
+        }
+
+        async function deleteTeacher(id, name) {
+            if (confirm(`${name} isimli öğretmeni silmek istediğinize emin misiniz?`)) {
+                await fetch(`/api/ogretmen-sil/${id}`, { method: 'DELETE' });
+                loadTeachers();
+                loadStudents();
+            }
+        }
+
+        async function showAttendanceDetail(id, name, no, geldi, gelmedi, izinli) {
+            document.getElementById('modalStudentName').innerText = `${name} (#${no})`;
+            document.getElementById('modalStudentInfo').innerText = `Son 90 Okul Günü Yoklama Detayı`;
+            document.getElementById('modalSummary').innerHTML = `
+                <span class="chip chip-green" style="font-size: 13px; padding: 6px 12px;">✔ ${geldi} Gün Okulda</span>
+                <span class="chip chip-red" style="font-size: 13px; padding: 6px 12px;">✖ ${gelmedi} Gün Devamsız</span>
+                <span class="chip chip-orange" style="font-size: 13px; padding: 6px 12px;">📋 ${izinli} Gün İzinli</span>
+            `;
+
+            const grid = document.getElementById('modalDaysGrid');
+            grid.innerHTML = '<p style="color:var(--text-muted);">Yükleniyor...</p>';
+            document.getElementById('detailModal').style.display = 'flex';
+
+            const res = await fetch(`/api/ogrenci-yoklama/${id}`);
+            const days = await res.json();
+            grid.innerHTML = '';
+            days.forEach(d => {
+                const box = document.createElement('div');
+                box.className = `day-box ${d.durum}`;
+                const icon = d.durum === 'Geldi' ? '✔' : (d.durum === 'Gelmedi' ? '✖' : '📋');
+                box.innerHTML = `<span>${d.tarih}</span> <span>${icon} ${d.durum}</span>`;
+                grid.appendChild(box);
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        window.onclick = function(e) {
+            const m = document.getElementById('detailModal');
+            if (e.target == m) m.style.display = 'none';
+        }
+
+        loadSchedule();
+        loadStudents();
+    </script>
+</body>
+</html>
